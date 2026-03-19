@@ -7,13 +7,13 @@ import yt_dlp
 import asyncio
 from collections import deque
 
-#Get auth for Discord Bot
+# dotenv laden
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-#Set Queue
 SONG_QUEUES = {}
 
+# yt_dlp‑Funktionen
 async def search_ytdlp_async(query, ydl_opts):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, lambda: _extract(query, ydl_opts))
@@ -22,150 +22,230 @@ def _extract(query, ydl_opts):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         return ydl.extract_info(query, download=False)
 
+# Intents
 intent = discord.Intents.default()
 intent.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intent)
 
-#set bot online
+#on_ready
 @bot.event
 async def on_ready():
     await bot.tree.sync()
     print(f"{bot.user} is online!")
 
-#greet command
+#Greet‑Command 
 @bot.tree.command(name="greet", description="Sends a greeting to the user")
-async def play(interaction: discord.Interaction):
+async def greet(interaction: discord.Interaction):
     username = interaction.user.mention
     await interaction.response.send_message(f"Hello there, {username}")
 
-#play command
+#Play Command
 @bot.tree.command(name="play", description="Play a song or add it to the queue.")
 @app_commands.describe(song_query="Search query")
 async def play(interaction: discord.Interaction, song_query: str):
-    await interaction.response.defer()
+    try:
+        await interaction.response.defer()
+    except discord.NotFound:
+        return
 
-#check if user is in a voice channel
+    # yt_dlp‑Optionen
+    ydl_options = {
+        "format": "bestaudio/best",
+        "noplaylist": True,
+        "youtube_include_dash_manifest": False,
+        "youtube_include_hls_manifest": False,
+    }
+
+    query = "ytsearch1: " + song_query
+
+    try:
+        results = await search_ytdlp_async(query, ydl_options)
+    except Exception as e:
+        try:
+            await interaction.followup.send(f"Error while searching: `{e}`")
+        except discord.NotFound:
+            pass
+        return
+
+    tracks = results.get("entries", [])
+
+    if not tracks:
+        try:
+            await interaction.followup.send("No results found.")
+        except discord.NotFound:
+            pass
+        return
+
+    first_track = tracks[0]
+    audio_url = first_track.get("url")
+    title = first_track.get("title", "Untitled")
+
+    if not audio_url:
+        try:
+            await interaction.followup.send("Could not get a playable URL.")
+        except discord.NotFound:
+            pass
+        return
+
+    # Queue setzen
+    guild_id = str(interaction.guild_id)
+    if SONG_QUEUES.get(guild_id) is None:
+        SONG_QUEUES[guild_id] = deque()
+
+    SONG_QUEUES[guild_id].append((audio_url, title))
+
+    # User in Voice‑Channel?
     voice_state = interaction.user.voice
     if voice_state is None or voice_state.channel is None:
-        await interaction.followup.send("You must be in a voice channel")
+        try:
+            await interaction.followup.send("You must be in a voice channel.")
+        except discord.NotFound:
+            pass
         return
 
     voice_channel = voice_state.channel
     voice_client = interaction.guild.voice_client
 
-#connect bot to user voice channel
     if voice_client is None:
         voice_client = await voice_channel.connect()
     elif voice_channel != voice_client.channel:
         await voice_client.move_to(voice_channel)
 
-#Set options for yt streaming
-    ydl_options = {
-            "format": "bestaudio[abr<=96]/bestaudio",
-            "noplaylist": True,
-            "youtube_include_dash_manifest": False,
-            "youtube_include_hls_manifest": False,
-        }
-
-#Seach query
-    query = "ytsearch1: " + song_query
-    results = await search_ytdlp_async(query, ydl_options)
-    tracks = results.get("entries", [])
-
-#if no tracks were found
-    if tracks is None:
-        await interaction.followup.send("No results found.")
-        return
-
-#set track info
-    first_track = tracks[0]
-    audio_url = first_track["url"]
-    title = first_track.get("title", "Untitled")
-
-    guild_id = str(interaction.guild_id)
-    if SONG_QUEUES.get(guild_id) is None:
-        SONG_QUEUES[guild_id] = deque()
-
-#add songs to queue
-    SONG_QUEUES[guild_id].append((audio_url, title))
-
+    # Wiedergabe / Queue
     if voice_client.is_playing() or voice_client.is_paused():
-        await interaction.followup.send(f"Added to queue: **{title}**")
+        try:
+            await interaction.followup.send(f"Added to queue: **{title}**")
+        except discord.NotFound:
+            pass
     else:
-        await interaction.followup.send(f"Now playing: **{title}**")
+        try:
+            await interaction.followup.send(f"Now playing: **{title}**")
+        except discord.NotFound:
+            pass
         await play_next_song(voice_client, guild_id, interaction.channel)
 
-#skip command
+#Skip Command
 @bot.tree.command(name="skip", description="Skips the current playing song")
 async def skip(interaction: discord.Interaction):
-    if interaction.guild.voice_client and (interaction.guild.voice_client.is_playing() or interaction.guild.voice_client.is_paused()):
-        interaction.guild.voice_client.stop()
-        await interaction.response.send_message("Skipped the current song")
-    else:
-        await interaction.response.send_message("Not playing anything to skip")
+    try:
+        await interaction.response.defer()
+    except discord.NotFound:
+        return
 
-#pause command
+    voice_client = interaction.guild.voice_client
+
+    if voice_client and (voice_client.is_playing() or voice_client.is_paused()):
+        voice_client.stop()
+        try:
+            await interaction.followup.send("Skipped the current song.")
+        except discord.NotFound:
+            pass
+    else:
+        try:
+            await interaction.followup.send("Not playing anything to skip.")
+        except discord.NotFound:
+            pass
+
+#Pause Command
 @bot.tree.command(name="pause", description="Pause the currently playing song")
 async def pause(interaction: discord.Interaction):
+    try:
+        await interaction.response.defer()
+    except discord.NotFound:
+        return
+
     voice_client = interaction.guild.voice_client
 
-    #Check if the bot is in a voice channel
     if voice_client is None:
-        return await interaction.response.send_message("I'm not in a voice channel")
+        try:
+            await interaction.followup.send("I'm not in a voice channel.")
+        except discord.NotFound:
+            pass
+        return
 
-    #Check if something is playing
     if not voice_client.is_playing():
-        return await interactin.response.send_message("Nothing is currently playing")
+        try:
+            await interaction.followup.send("Nothing is currently playing.")
+        except discord.NotFound:
+            pass
+        return
 
-    #Pause track
     voice_client.pause()
-    await interaction.response.send_message("Song paused")
+    try:
+        await interaction.followup.send("Song paused.")
+    except discord.NotFound:
+        pass
 
-#resume command
+#Resume Command
 @bot.tree.command(name="resume", description="Resume currently paused song")
 async def resume(interaction: discord.Interaction):
+    try:
+        await interaction.response.defer()
+    except discord.NotFound:
+        return
+
     voice_client = interaction.guild.voice_client
-    
-    #Check if bot is in voice channel
+
     if voice_client is None:
-        return await interaction.response.send_message("I'm not in a voice channel")
+        try:
+            await interaction.followup.send("I'm not in a voice channel.")
+        except discord.NotFound:
+            pass
+        return
 
-    #Check if paused
     if not voice_client.is_paused():
-        return await interactin.response.send_message("I'm not paused right now")
+        try:
+            await interaction.followup.send("I'm not paused right now.")
+        except discord.NotFound:
+            pass
+        return
 
-    #Resume playback
     voice_client.resume()
-    await interaction.response.send_message("Playback resumed")
+    try:
+        await interaction.followup.send("Playback resumed.")
+    except discord.NotFound:
+        pass
 
-#stop command
+#Stop Command 
 @bot.tree.command(name="stop", description="Stop playback and clear the queue")
 async def stop(interaction: discord.Interaction):
-    await interaction.response.defer()
+    try:
+        await interaction.response.defer()
+    except discord.NotFound:
+        return
+
     voice_client = interaction.guild.voice_client
 
-    #Check if bot is in voice channel
     if voice_client is None:
-        return await interaction.followup.send("I'm not in a voice channel")
+        try:
+            await interaction.followup.send("I'm not in a voice channel.")
+        except discord.NotFound:
+            pass
+        return
 
-    #Clear the queue
-    guild_id_str = str(interaction.guild_id)
-    if guild_id_str in SONG_QUEUES:
-        SONG_QUEUES[guild_id_str].clear()
+    guild_id = str(interaction.guild_id)
+    if guild_id in SONG_QUEUES:
+        SONG_QUEUES[guild_id].clear()
 
-    #If something is playing or paused, stop it
     if voice_client.is_playing() or voice_client.is_paused():
         voice_client.stop()
 
-    await interaction.followup.send("Stopped playback and disconnected")
+    try:
+        await interaction.followup.send("Stopped playback and disconnected.")
+    except discord.NotFound:
+        pass
 
-    #Disconnect from channel
     await voice_client.disconnect()
 
-
+#play next song
 async def play_next_song(voice_client, guild_id, channel):
-    if SONG_QUEUES[guild_id]:
+    if not voice_client.is_connected():
+        if SONG_QUEUES.get(guild_id):
+            SONG_QUEUES[guild_id].clear()
+        return
+
+    if SONG_QUEUES.get(guild_id):
         audio_url, title = SONG_QUEUES[guild_id].popleft()
 
         ffmpeg_options = {
@@ -182,9 +262,9 @@ async def play_next_song(voice_client, guild_id, channel):
 
         voice_client.play(source, after=after_play)
         await channel.send(f"Now playing: **{title}**")
-
     else:
         await voice_client.disconnect()
         SONG_QUEUES[guild_id] = deque()
 
+# Bot starten
 bot.run(TOKEN)
