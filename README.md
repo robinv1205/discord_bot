@@ -25,6 +25,11 @@ DISCORD_TOKEN=TOKEN
 ```bash
 sudo pacman -S ffmpeg
 ```
+#I have added a new ChatBot with Groq
+You'll need to install Groq, as well as create an account to get the API key
+```bash
+pip install groq --break-system-packages
+```
 
 # Commands
 - `/play <query>` -> Song von Youtube starten

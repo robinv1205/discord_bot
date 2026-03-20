@@ -3,3 +3,4 @@ python-dotenv >= 1.0
 yt-dlp >= 2024.0
 PyNaCl >= 1.5
 requests >= 2.28
+groq==1.1.1
