@@ -1,4 +1,4 @@
-# Discord Music Bot
+# Discord Music Bot & Groq ChatBot
 
 ## Setup
 
