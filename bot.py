@@ -39,23 +39,16 @@ async def greet(interaction: discord.Interaction):
     username = interaction.user.mention
     await interaction.response.send_message(f"Hello there, {username}")
 
-# Jib-Command (Tippfehler 'mentioni' gefixt)
-@bot.tree.command(name="jib", description="jibbet?")
-async def jib(interaction: discord.Interaction):
-    username = interaction.user.mention  # Fix: war 'mentioni'
-    await interaction.response.send_message(f"bau mal ein, {username}")
-
 # Play Command
 @bot.tree.command(name="play", description="Play a song or add it to the queue.")
 @app_commands.describe(song_query="Search query")
 async def play(interaction: discord.Interaction, song_query: str):
-    # Doppelte Interaction-Verarbeitung verhindern
+    # Doppelte Interaction verhindern
     if interaction.id in PENDING_INTERACTIONS:
         return
     PENDING_INTERACTIONS.add(interaction.id)
 
     try:
-        # Sofort defer – verhindert Discord-Timeout (3s Limit)
         if not interaction.response.is_done():
             await interaction.response.defer()
 
@@ -207,7 +200,7 @@ async def play_next_song(voice_client, guild_id, channel):
 
         ffmpeg_options = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            "options": "-vn -c:a libopus -b:a 96k -f opus -loglevel quiet",  # Fix: war '-logleve'
+            "options": "-vn -c:a libopus -b:a 96k -f opus -loglevel quiet",
         }
 
         source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_options)
