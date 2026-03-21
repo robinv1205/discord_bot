@@ -2,28 +2,20 @@
 
 ## Setup
 
-1. Python 3.9+ installieren
-2. Virtuelle Umgebung erstellen
-
-```bash
-    python -m venv venv
-    source venv/bin/activate 
-    # venv\Scripts\activate #Windows
-```
-
-3. Pakete installieren
+1. Python 3.9+ 
+2. Pakete installieren
 ```bash
 pip install -r requirements.txt
 ```
 
-4. `.env.`-Datei erstellen
+4. Put tokens in `.env.` 
 ```text
 DISCORD_TOKEN=TOKEN
 BOT_TOKEN
 GROQ_API
 ```
 
-## FFmpeg installieren
+## Install FFmpeg
 ```bash
 sudo pacman -S ffmpeg
 ```
@@ -34,10 +26,10 @@ pip install groq --break-system-packages
 ```
 
 # Commands
-- `/play <query>` -> Song von Youtube starten
-- `/skip` -> Aktuellen Song skippen
-- `/pause` -> pausieren
-- `/resume` -> fortsetzen
-- `/stop` -> Bot stoppen und disconnect
+- `/play <query>` -> Start song from YouTube
+- `/skip` -> Skip currently played song
+- `/pause` -> Pause
+- `/resume` -> Resume
+- `/stop` -> Stops Bot and disconnects from channel
 - `//` -> address AI-Bot
 
