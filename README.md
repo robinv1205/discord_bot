@@ -3,7 +3,7 @@
 ## Setup
 
 1. Python 3.9+ 
-2. Pakete installieren
+2. Install packages
 ```bash
 pip install -r requirements.txt
 ```
