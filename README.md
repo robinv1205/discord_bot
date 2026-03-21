@@ -19,6 +19,8 @@ pip install -r requirements.txt
 4. `.env.`-Datei erstellen
 ```text
 DISCORD_TOKEN=TOKEN
+BOT_TOKEN
+GROQ_API
 ```
 
 ## FFmpeg installieren
@@ -37,4 +39,5 @@ pip install groq --break-system-packages
 - `/pause` -> pausieren
 - `/resume` -> fortsetzen
 - `/stop` -> Bot stoppen und disconnect
+- `//` -> address AI-Bot
 
