@@ -1,6 +1,6 @@
 bin/ffmpeg
 bin/ffprobe
-biin/ffplay
+bin/ffplay
 __pycache__/
 *.pyc
 venv/
