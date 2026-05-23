@@ -1,9 +1,7 @@
 <div align="center">
 <h1>Discord Music and Groq ChatBot</h1>
-<img scr="https://img.shields.io/badge/discord--1dc7b5?style=for-the-badge&logo=discord&logoColor=1dc7b5
-" alt="Discord" />
-<img src="https://img.shields.io/badge/python--1dc7b5?style=for-the-badge&logo=python&logoColor=1dc7b5
-" alt="Python" />
+<img scr="https://img.shields.io/badge/discord--1dc7b5?style=for-the-badge&logo=discord&logoColor=1dc7b5" alt="Discord" />
+<img src="https://img.shields.io/badge/python--1dc7b5?style=for-the-badge&logo=python&logoColor=1dc7b5" alt="Python" />
 </div>
 
 ---
