@@ -25,9 +25,9 @@ pip install -r requirements.txt
 1. Put tokens in `.env.`
 
 ```text
-DISCORD_TOKEN=TOKEN
-BOT_TOKEN
-GROQ_API
+DISCORD_TOKEN=<TOKEN>
+BOT_TOKEN=<TOKEN>
+GROQ_API=<TOKEN>
 ```
 
 <h2>Install FFmpeg</h2>
