@@ -6,6 +6,9 @@
 
 ---
 
+> [!WARNING] CURRENTLY BROKEN
+> UNFORTUNATELY THE MUSIC BOT DOES NOT WORK ATM - YOUTUBE IMPLEMENTED AN ANTI-BOT FEATURE THAT PREVENTS ytdlp FROM ACCESSING YOUTUBE
+
 <!-- TODO: add demo video -->
 
 ## Setup
@@ -13,20 +16,20 @@
 <details open>
   <summary><b>Requirements</b></summary>
 
-  1. Python 3.9+
-  2. Install packages
+1. Python 3.9+
+2. Install packages
 
-  ```bash
-  pip install -r requirements.txt
-  ```
+```bash
+pip install -r requirements.txt
+```
 
-  1. Put tokens in `.env.`
+1. Put tokens in `.env.`
 
-  ```text
-  DISCORD_TOKEN=TOKEN
-  BOT_TOKEN
-  GROQ_API
-  ```
+```text
+DISCORD_TOKEN=TOKEN
+BOT_TOKEN
+GROQ_API
+```
 
 <h2>Install FFmpeg</h2>
 
@@ -53,5 +56,5 @@ pip install groq --break-system-packages
 - `/resume` -> Resume
 - `/stop` -> Stops Bot and disconnects from channel
 - `//` -> address AI-Bot
-  
+
 </details>
